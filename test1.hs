@@ -64,7 +64,6 @@ getMissingElement (s, e) x =
   let l2 = Set.fromList x in
   (head . Set.toList) $ Set.difference s1 l2
   
-  
 -- Frequnency of elements in a list
 freqList :: (Ord a) => [a] -> [a]
 freqList x = 
@@ -130,6 +129,17 @@ bTreeInOrder rest =
                               (_, False) -> rrr
                in ret
 
+        
+-- Fizz Buzz test in Haskell
+fizzBuzz :: IO ()
+fizzBuzz = do 
+         print (map fizzbuzz [1..100])
+         where
+              fizzbuzz x = case (x `mod` 3 == 0, x `mod` 5 == 0) of
+                                (True,True) -> "FizzBuzz"
+                                (True,False) -> "Fizz"
+                                (False,True) -> "Buzz"
+                                (False,False) -> show x
 
 main :: IO ()
 -- Fill this in later
