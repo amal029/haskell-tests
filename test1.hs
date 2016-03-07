@@ -140,6 +140,83 @@ fizzBuzz = do
                                 (True,False) -> "Fizz"
                                 (False,True) -> "Buzz"
                                 (False,False) -> show x
+                                
+mapi     :: (Num i) => (i -> a -> a) -> [a] -> [a]
+mapi f x = map' 0 x
+     where
+       map' _ [] = []
+       map' c (x1:xs) = (f c x1) : (map' (c + 1) xs)
+       
+map2       :: (a -> b -> c) -> [a] -> [b] -> Either String [c]
+map2 f a b = 
+     if L.length a == L.length b 
+     then Right (map2' a b) 
+     else Left "Strings not of equal length"
+     where
+          map2' [] []         = []
+          map2' (a:as) (b:bs) = (f a b) : map2' as bs
+          map2' _ _           = error "Sr" -- XXX: What is the point of this??
+          
+map2Shortest                 :: (a -> b -> c) -> [a] -> [b] -> [c]
+map2Shortest _ [] []         = []
+map2Shortest _ [] _          = []
+map2Shortest _ _ []          = []
+map2Shortest f (x:xs) (y:ys) = (f x y) : map2Shortest f xs ys
+
+apply :: (a -> a -> a) -> [a] -> Either String a
+apply _ [] = Left "List is empty"
+apply f (x:xs) = Right (L.foldl' f x xs)
+
+-- XXX: Example of a closure in haskell
+plusx :: (Num a) => a -> (a -> a)
+plusx x =
+  let y = 3
+  in (+ x*y)
+
+map3 :: (a -> b -> c -> d) -> [a] -> [b] -> [c] -> [d]
+map3 _ [] _ _ = []
+map3 _ _ [] _ = []
+map3 _ _ _ [] = []
+map3 f (a:as) (b:bs) (c:cs) = (f a b c) : map3 f as bs cs
+
+data BTree a = BLeaf a
+              | BNode a (BTree a) (BTree a) deriving (Eq, Show, Ord)
+
+instance Functor BTree where
+  fmap f (BLeaf g) = BLeaf (f g)
+  fmap f (BNode a y z) = BNode (f a) (fmap f y) (fmap f z)
+  
+llookup :: (Ord a) => a -> BTree a -> Bool
+llookup v (BNode x y z) = if x == v 
+                      then True
+                      else if v < x 
+                      then llookup v y
+                      else llookup v z
+llookup v (BLeaf x) = v == x
+  
+instance Applicative BTree where
+  pure x  = BLeaf x
+  (BLeaf f) <*> (BLeaf x) = BLeaf (f x)
+  (BNode f f1 f2) <*> (BNode x y z) = BNode (f x) (f1 <*> y) (f2 <*> z)
+  
+class (Traversable t) => Stack t where
+  pop  :: t a -> (Maybe a, t a) 
+  push :: a -> t a -> t a
+
+instance Stack [] where
+  pop (x:xs) = (Just x, xs)
+  pop []     = (Nothing, [])
+  push x y   = x:y
+
+
+qsort :: (Ord a, Eq a) => [a] -> [a]
+qsort [] = [] 
+qsort (x:xs) = (qsort (L.filter (< x) xs)) ++ [x] ++ (qsort (L.filter (> x) xs))
+
+
+-- XXX: Adjacency list data structure for a graph
+newtype GNode a = GNode [a] deriving (Show, Eq)
+newtype AdjList a = AdjList [GNode a] deriving (Show, Eq)
 
 main :: IO ()
 -- Fill this in later
