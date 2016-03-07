@@ -40,8 +40,28 @@ insert' (Node x1 x2 x3) z = case (x2, x3) of
 -- XXX: Ensure the heap property
 swap                     :: (Ord a) => (a -> a -> Bool) -> a -> Bheap a -> Bheap a
 swap _ _ Empty           = Empty
-swap f x (Node y1 y2 y3) = let lookup = undefined
-                           in undefined
+swap f x (Node y1 y2 y3) = if y1 == x
+                              then (Node y1 y2 y3)
+                              else 
+                               let left            = swap f x y2
+                                   right           = swap f x y3
+                               in 
+                                case (left, right) of
+                                  (Empty, Empty) -> Node y1 left right
+                                  (Empty, Node v l r) -> if not (f x v)
+                                                            then Node v left (Node y1 l r)
+                                                            else Node y1 left right
+                                  (Node v l r, Empty) -> if not (f x v)
+                                                            then Node v (Node y1 l r) right
+                                                            else Node y1 left right
+                                  (Node vl ll rl, Node vr lr rr) -> if not (f x vl) && not (f x vr)
+                                                                       then error "Screwed"
+                                                                       else if not (f x vl) 
+                                                                            then  Node vl (Node y1 ll rl) right
+                                                                               else if not (f x vr) 
+                                                                                    then Node vr (Node y1 lr rr) left
+                                                                                       else Node y1 left right
+
 
 
 -- XXX: Insert
