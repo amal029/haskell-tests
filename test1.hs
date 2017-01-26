@@ -4,7 +4,30 @@ module Main where
 import qualified Data.List as L
 import qualified Data.Set as Set
 import Data.Either
+import Test.QuickCheck
 -- import qualified Data.ByteString as B
+
+-- XXX: Example of a simple Int evaluator
+data IAst = I Double
+          | Add IAst IAst
+          | S String
+          | Sub IAst IAst deriving (Ord, Eq, Show)
+
+-- XXX: Arbitary generator
+instance Arbitrary IAst where
+  arbitrary = do
+            x <- arbitrarySizedFractional
+            z <- getString
+            elements [I x, Add (I x) (I x), Sub (I x) (I x), S z]
+            where
+                getString :: Gen [Char]
+                getString = listOf $ arbitraryBoundedRandom
+
+instance Bounded IAst where
+  minBound = I 0
+  maxBound = S ""
+
+
 
 -- An ast for a lisp evaluator
   
@@ -213,10 +236,24 @@ qsort :: (Ord a, Eq a) => [a] -> [a]
 qsort [] = [] 
 qsort (x:xs) = (qsort (L.filter (< x) xs)) ++ [x] ++ (qsort (L.filter (> x) xs))
 
+  
+newtype F = F Integer
+
+-- XXX: foldr
+mfoldr :: (b -> a -> b) -> b -> [a] -> b
+mfoldr _ x [] = x
+mfoldr f x (y:ys) = f (mfoldr f x ys) y
+
+-- XXX: foldl
+mfoldl            :: (a -> b -> b) -> [a] -> b -> b
+mfoldl _ [] y     = y
+mfoldl f (x:xs) y = mfoldl f xs (f x y)
 
 -- XXX: Adjacency list data structure for a graph
 newtype GNode a = GNode [a] deriving (Show, Eq)
 newtype AdjList a = AdjList [GNode a] deriving (Show, Eq)
+    
+-- XXX: Example of Quickcheck
 
 main :: IO ()
 -- Fill this in later
